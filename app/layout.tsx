@@ -1,22 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Noto_Sans_KR, Gothic_A1 } from 'next/font/google'
 import { AppProvider } from '@/components/app-provider'
 import './globals.css'
-
-const notoSansKr = Noto_Sans_KR({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  variable: '--font-pretendard',
-  display: 'swap',
-})
-
-const gothicA1 = Gothic_A1({
-  subsets: ['latin'],
-  weight: ['500', '700', '800'],
-  variable: '--font-gothic',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   title: '택시타쉐어 · 같은 방향이라면 택시비도 함께',
@@ -40,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ko" className={`bg-muted ${notoSansKr.variable} ${gothicA1.variable}`}>
+    <html lang="ko" className="bg-muted">
       <body className="font-sans antialiased">
         <AppProvider>{children}</AppProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}

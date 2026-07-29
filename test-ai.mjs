@@ -12,7 +12,7 @@ async function askAI() {
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-5.5', // 게이트웨이에 등록된 GPT 5.5 모델 ID
+      model: 'gpt-5.4-mini', // GPT 5.4 mini 모델 ID
       messages: [{ role: 'user', content: '안녕! 연동이 성공했는지 확인해줘.' }],
     });
 

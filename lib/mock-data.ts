@@ -1,16 +1,21 @@
 // Mock data & domain types for the 택시타쉐어 prototype.
 // Structured so it can later map cleanly to a Next.js + Neon DB backend.
 
-export type Gender = 'female' | 'male' | 'none'
-export type RoomStatus = 'recruiting' | 'closed' | 'gathering' | 'settling' | 'settled'
+import { type GroupStatus } from './domain'
+import { type Gender } from './profile'
+
+export type RoomStatus = GroupStatus
 export type MemberRole = 'host' | 'member'
 export type ApprovalMode = 'auto' | 'host'
+export type ParticipantStatus = 'APPLIED' | 'APPROVED' | 'DEPOSITED' | 'CHECKED_IN' | 'NO_SHOW' | 'COMPLETED' | 'CANCELLED'
+export type RecruitmentCloseMethod = 'departure-time' | 'host'
 
 export interface RoomMember {
   id: string
   /** 개인정보 보호를 위해 일부만 노출 (예: "민지", "준*") */
   displayName: string
   role: MemberRole
+  status: ParticipantStatus
   checkedIn: boolean
 }
 
@@ -31,6 +36,7 @@ export interface Room {
   maxSeats: number
   members: RoomMember[]
   status: RoomStatus
+  recruitmentCloseMethod: RecruitmentCloseMethod
   /** 예상 1인 분담 포인트 */
   perPersonPoints: number
   /** 예상 총 택시비(원) */
@@ -50,19 +56,21 @@ export interface PointTx {
 }
 
 export interface CurrentUser {
+  id: string
+  phoneNumber: string
   name: string
-  studentId: string
   gender: Gender
-  email: string
+  universityEmail: string
   points: number
   deposited: number
 }
 
 export const currentUser: CurrentUser = {
+  id: 'u-me',
+  phoneNumber: '010-1234-5678',
   name: '민지',
-  studentId: '20213456',
   gender: 'female',
-  email: 'minji@jbnu.ac.kr',
+  universityEmail: 'minji@jbnu.ac.kr',
   points: 24000,
   deposited: 0,
 }
@@ -80,7 +88,8 @@ export const recommendedRooms: Room[] = [
     departLabel: '오늘 22:30',
     minutesUntilDepart: 12,
     maxSeats: 4,
-    status: 'recruiting',
+    status: 'OPEN',
+    recruitmentCloseMethod: 'departure-time',
     perPersonPoints: 4500,
     estimatedFare: 12000,
     distanceKm: 7.8,
@@ -88,8 +97,8 @@ export const recommendedRooms: Room[] = [
     approval: 'auto',
     allowNearby: true,
     members: [
-      { id: 'u1', displayName: '민지', role: 'host', checkedIn: false },
-      { id: 'u2', displayName: '준호', role: 'member', checkedIn: false },
+      { id: 'u1', displayName: '민지', role: 'host', status: 'APPROVED', checkedIn: false },
+      { id: 'u2', displayName: '준호', role: 'member', status: 'APPROVED', checkedIn: false },
     ],
     reason: { fromOriginMeters: 120, toDestMeters: 230, detourMinutes: 3 },
   },
@@ -100,7 +109,8 @@ export const recommendedRooms: Room[] = [
     departLabel: '오늘 23:10',
     minutesUntilDepart: 52,
     maxSeats: 4,
-    status: 'recruiting',
+    status: 'OPEN',
+    recruitmentCloseMethod: 'host',
     perPersonPoints: 6200,
     estimatedFare: 12400,
     distanceKm: 8.1,
@@ -108,9 +118,9 @@ export const recommendedRooms: Room[] = [
     approval: 'host',
     allowNearby: false,
     members: [
-      { id: 'u3', displayName: '서연', role: 'host', checkedIn: false },
-      { id: 'u4', displayName: '도윤', role: 'member', checkedIn: false },
-      { id: 'u5', displayName: '하은', role: 'member', checkedIn: false },
+      { id: 'u3', displayName: '서연', role: 'host', status: 'APPROVED', checkedIn: false },
+      { id: 'u4', displayName: '도윤', role: 'member', status: 'APPROVED', checkedIn: false },
+      { id: 'u5', displayName: '하은', role: 'member', status: 'APPROVED', checkedIn: false },
     ],
     reason: { fromOriginMeters: 260, toDestMeters: 150, detourMinutes: 5 },
   },
@@ -121,14 +131,15 @@ export const recommendedRooms: Room[] = [
     departLabel: '오늘 21:50',
     minutesUntilDepart: 8,
     maxSeats: 4,
-    status: 'recruiting',
+    status: 'OPEN',
+    recruitmentCloseMethod: 'departure-time',
     perPersonPoints: 3800,
     estimatedFare: 11400,
     distanceKm: 7.5,
     durationMin: 19,
     approval: 'auto',
     allowNearby: true,
-    members: [{ id: 'u6', displayName: '지우', role: 'host', checkedIn: false }],
+    members: [{ id: 'u6', displayName: '지우', role: 'host', status: 'APPROVED', checkedIn: false }],
     reason: { fromOriginMeters: 340, toDestMeters: 420, detourMinutes: 6 },
   },
 ]

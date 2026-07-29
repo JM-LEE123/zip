@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:domain": "node scripts/domain-check.mjs",
+    "test:profile": "node scripts/profile-check.mjs",
+    "test:schema": "node scripts/schema-check.mjs",
+    "vercel:env": "powershell -ExecutionPolicy Bypass -File scripts/vercel-env.ps1",
+    "vercel:run": "powershell -ExecutionPolicy Bypass -File scripts/vercel-run.ps1"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

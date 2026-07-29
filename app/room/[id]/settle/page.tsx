@@ -8,6 +8,11 @@ import { TopBar } from '@/components/top-bar'
 import { Card, CardTitle } from '@/components/ui/card'
 import { BottomBar, BigButton } from '@/components/bottom-bar'
 import { useApp } from '@/components/app-provider'
+import {
+  calculateEstimatedPerPersonDeposit,
+  calculateFinalPerPersonBurden,
+  isCountedAsConfirmedParticipant,
+} from '@/lib/domain'
 import { formatPoints, formatWon, getRoomById } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
 
@@ -22,9 +27,11 @@ export default function SettlePage() {
 
   if (!room) return null
 
-  const confirmed = 3
-  const deposit = round100(room.estimatedFare / confirmed)
-  const finalShare = round100(fare / confirmed)
+  const confirmed = room.members.filter((m) =>
+    isCountedAsConfirmedParticipant(m.status),
+  ).length
+  const deposit = calculateEstimatedPerPersonDeposit(room.estimatedFare, confirmed)
+  const finalShare = calculateFinalPerPersonBurden(fare, confirmed)
   const diff = finalShare - deposit // >0 추가 차감, <0 반환
 
   function finish() {
@@ -211,8 +218,4 @@ function Row({
       </span>
     </div>
   )
-}
-
-function round100(n: number) {
-  return Math.round(n / 100) * 100
 }

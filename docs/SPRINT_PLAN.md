@@ -384,3 +384,109 @@
 | 9 |  |  |  |  |  |
 | 10 |  |  |  |  |  |
 | 11 |  |  |  |  |  |
+
+## Sprint 0 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Reviewed `docs/PRD.md` and `AGENTS.md`.
+- Confirmed the current repository is still a mock/prototype UI, not a durable backend.
+- Mapped the PRD assumptions and open decisions into the sprint plan decision log.
+- Verified the required domain and quality gate skills for Sprint 0.
+- Ran validation commands.
+
+Current repo findings:
+- The app is currently built around static pages and local mock data in `lib/mock-data.ts`.
+- I did not find Neon PostgreSQL schema, route handlers, or server actions for the MVP domain yet.
+- The main production build blocker was external Google Fonts fetching in `app/layout.tsx`; I removed that dependency so `npm run build` works offline.
+
+Validation results:
+- `npm run build`: passed
+- `npm run lint`: blocked because `eslint` is not installed in the repository
+
+Open blockers to track before Sprint 1:
+- `D-01`: Neon DB environment separation and backup/restore policy.
+- `D-03`: Map provider choice for routing.
+- `D-04`: Nearby destination detour threshold policy.
+- `D-05`: Administrator point issuance taxonomy and access scope.
+- `D-06`: No-show policy and settlement math details.
+- `D-07`: Final settlement basis and confirmation policy.
+- `D-08`: Initial release boundaries and admin operations scope.
+
+## Sprint 1 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Added explicit group and participant status constants in `lib/domain.ts`.
+- Added recruitment close method and capacity validation helpers.
+- Added ceiling-based deposit and final settlement calculations.
+- Added a focused domain verification script at `scripts/domain-check.mjs`.
+- Updated the mock state model and UI entry points to use explicit group status values.
+- Replaced settlement rounding with PRD-aligned ceiling calculations.
+
+Current repo findings:
+- Group status is now represented as `OPEN`/`CLOSED` in the mock layer, with explicit participant statuses on room members.
+- Recruitment closure now validates against open status and capacity before joining.
+- Settlement uses `ceil(estimated_total / confirmed_participant_count)` and `ceil(actual_total / settlement_participant_count)`.
+
+Validation results:
+- `npm run test:domain`: passed
+- `npm run build`: passed
+- `npm run lint`: still blocked because `eslint` is not installed in the repository
+
+Sprint 1 status:
+- The explicit state and calculation foundation for later backend work is in place.
+
+## Sprint 2 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Replaced the signup flow with a phone-number, name, gender, and university-email profile form.
+- Added `lib/profile.ts` as the profile schema and validation module.
+- Added a server action in `app/signup/actions.ts` so profile input is validated on the server boundary.
+- Added client-side loading and field-error feedback to the signup flow.
+- Added `updateProfile` to the app provider so validated profile data can update the in-memory user state.
+- Updated the my page profile card to show phone number and university email.
+- Added `npm run test:profile` to cover normalization and validation rules.
+
+Current repo findings:
+- The app still uses client-side in-memory state for the demo, but profile submission now has a real server action validation boundary.
+- The profile model no longer relies on student-id entry in the signup flow.
+- Public profile display now shows only phone number and university email, not internal identifiers.
+
+Validation results:
+- `npm run test:profile`: passed
+- `npm run build`: passed
+- `npm run lint`: still blocked because `eslint` is not installed in the repository
+
+Follow-up for later sprints:
+- Real privileged authorization still needs a dedicated server boundary once admin and host mutations become server-backed.
+
+## Sprint 3 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Added a reversible PostgreSQL migration at `db/migrations/001_init.up.sql` and `db/migrations/001_init.down.sql`.
+- Defined tables for users, trip groups, trip participants, fare estimates, match recommendations, settlements, point ledger, reports, and blocks.
+- Added core database constraints for capacity, status, uniqueness, and append-only ledger idempotency.
+- Added typed schema contracts in `lib/db/schema.ts` and repository interfaces in `lib/db/repository.ts`.
+- Added environment resolution helpers in `lib/db/env.ts` for separate development, preview, and production Neon URLs.
+- Added `.env.example` to document server-only database and provider variables.
+- Added `npm run test:schema` to verify required schema and env names are present.
+
+Current repo findings:
+- The project still does not connect to Neon at runtime, but the persistent-data schema and repository contract now exist.
+- Preview/Production database separation is now named in code and example env files.
+- The point ledger schema is append-only by design, with idempotency and balance-effect fields.
+
+Validation results:
+- `npm run test:schema`: passed
+- `npm run build`: passed
+- `npm run lint`: still blocked because `eslint` is not installed in the repository
+
+Follow-up for later sprints:
+- Actual query implementation and transaction handling still need a real Neon driver or repository adapter before persistent writes can run.

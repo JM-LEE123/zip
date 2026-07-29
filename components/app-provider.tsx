@@ -16,6 +16,11 @@ import {
   type PointTx,
   type Room,
 } from '@/lib/mock-data'
+import {
+  canAcceptApplication,
+  canHostCloseRecruitment,
+  isCountedAsConfirmedParticipant,
+} from '@/lib/domain'
 import { Toaster } from '@/components/ui/toast'
 
 interface AppState {
@@ -24,8 +29,9 @@ interface AppState {
   history: PointTx[]
   joinedRoomIds: string[]
   toast: (message: string, tone?: 'default' | 'success' | 'warn') => void
-  depositAndJoin: (room: Room) => void
-  closeRoom: (roomId: string) => void
+  updateProfile: (profile: Pick<CurrentUser, 'phoneNumber' | 'name' | 'gender' | 'universityEmail'>) => void
+  depositAndJoin: (room: Room) => boolean
+  closeRoom: (roomId: string) => boolean
   addHistory: (tx: Omit<PointTx, 'id' | 'date'>) => void
   settleAdjust: (delta: number) => void
 }
@@ -59,26 +65,90 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ])
   }, [])
 
+  const updateProfile = useCallback(
+    (profile: Pick<CurrentUser, 'phoneNumber' | 'name' | 'gender' | 'universityEmail'>) => {
+      setUser((u) => ({
+        ...u,
+        ...profile,
+      }))
+    },
+    [],
+  )
+
   const depositAndJoin = useCallback(
     (room: Room) => {
+      if (room.members.some((m) => m.id === initialUser.id)) {
+        toast('이미 참여한 방이에요.', 'warn')
+        return false
+      }
+
+      const participantCount = room.members.filter((m) =>
+        isCountedAsConfirmedParticipant(m.status),
+      ).length
+      if (
+        !canAcceptApplication({
+          groupStatus: room.status,
+          currentParticipantCount: participantCount,
+          maxSeats: room.maxSeats,
+        })
+      ) {
+        toast('모집이 마감되었거나 정원이 가득 찬 방에는 참여할 수 없어요.', 'warn')
+        return false
+      }
+
       setUser((u) => ({
         ...u,
         points: u.points - room.perPersonPoints,
         deposited: u.deposited + room.perPersonPoints,
       }))
+      setRooms((rs) =>
+        rs.map((r) =>
+          r.id === room.id
+            ? {
+                ...r,
+                members: r.members.some((m) => m.id === initialUser.id)
+                  ? r.members
+                  : [
+                      ...r.members,
+                      {
+                        id: initialUser.id,
+                        displayName: initialUser.name,
+                        role: 'member',
+                        status: 'DEPOSITED',
+                        checkedIn: false,
+                      },
+                    ],
+              }
+            : r,
+        ),
+      )
       setJoinedRoomIds((ids) =>
         ids.includes(room.id) ? ids : [...ids, room.id],
       )
       addHistory({ label: '방 참여 예치', amount: -room.perPersonPoints })
+      return true
     },
-    [addHistory],
+    [addHistory, toast],
   )
 
-  const closeRoom = useCallback((roomId: string) => {
-    setRooms((rs) =>
-      rs.map((r) => (r.id === roomId ? { ...r, status: 'closed' } : r)),
-    )
-  }, [])
+  const closeRoom = useCallback(
+    (roomId: string) => {
+      let updated = false
+      setRooms((rs) =>
+        rs.map((r) => {
+          if (r.id !== roomId) return r
+          if (!canHostCloseRecruitment(r.status)) return r
+          updated = true
+          return { ...r, status: 'CLOSED' }
+        }),
+      )
+      if (!updated) {
+        toast('이미 마감된 방이거나 마감할 수 없는 상태예요.', 'warn')
+      }
+      return updated
+    },
+    [toast],
+  )
 
   const settleAdjust = useCallback(
     (delta: number) => {
@@ -103,12 +173,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
       history,
       joinedRoomIds,
       toast,
+      updateProfile,
       depositAndJoin,
       closeRoom,
       addHistory,
       settleAdjust,
     }),
-    [user, rooms, history, joinedRoomIds, toast, depositAndJoin, closeRoom, addHistory, settleAdjust],
+    [user, rooms, history, joinedRoomIds, toast, updateProfile, depositAndJoin, closeRoom, addHistory, settleAdjust],
   )
 
   return (

@@ -7,7 +7,7 @@ import { formatPoints, type Room } from '@/lib/mock-data'
 
 export function RoomCard({ room }: { room: Room }) {
   const seatsLeft = room.maxSeats - room.members.length
-  const closed = room.status === 'closed'
+  const closed = room.status === 'CLOSED'
 
   return (
     <Card className="flex flex-col gap-3">

@@ -57,7 +57,8 @@ export default function MyPage() {
               <GraduationCap className="size-3.5" aria-hidden />
               전북대학교 · {genderLabel}
             </p>
-            <p className="mt-0.5 truncate text-xs text-muted-foreground">{user.email}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{user.phoneNumber}</p>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">{user.universityEmail}</p>
           </div>
         </Card>
 

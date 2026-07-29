@@ -7,56 +7,78 @@ import { MobileShell } from '@/components/mobile-shell'
 import { TopBar } from '@/components/top-bar'
 import { BottomBar, BigButton } from '@/components/bottom-bar'
 import { useApp } from '@/components/app-provider'
+import { submitSignupProfile } from './actions'
 import { cn } from '@/lib/utils'
 
 const genders = [
   { value: 'female', label: '여성' },
   { value: 'male', label: '남성' },
   { value: 'none', label: '선택 안 함' },
-]
+] as const
 
 export default function SignupPage() {
   const router = useRouter()
-  const { toast } = useApp()
-  const [studentId, setStudentId] = useState('')
+  const { toast, updateProfile } = useApp()
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [name, setName] = useState('')
-  const [gender, setGender] = useState('female')
-  const [email, setEmail] = useState('')
+  const [gender, setGender] = useState<(typeof genders)[number]['value']>('female')
+  const [universityEmail, setUniversityEmail] = useState('')
   const [agree, setAgree] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  const canSubmit = studentId && name && email && agree
+  const canSubmit = phoneNumber && name && universityEmail && agree && !isSubmitting
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!canSubmit) return
-    toast('가입이 완료되었어요. 환영해요!', 'success')
+    setIsSubmitting(true)
+    setFieldErrors({})
+
+    const result = await submitSignupProfile({
+      phoneNumber,
+      name,
+      gender,
+      universityEmail,
+    })
+
+    if (!result.ok) {
+      setFieldErrors(result.errors)
+      toast('입력값을 다시 확인해 주세요.', 'warn')
+      setIsSubmitting(false)
+      return
+    }
+
+    updateProfile(result.profile)
+    toast('가입이 완료되었어요. 환영합니다!', 'success')
+    setIsSubmitting(false)
     router.push('/home')
   }
 
   return (
     <MobileShell withTabBar={false} className="bg-background">
-      <TopBar title="회원가입" subtitle="택시타쉐어 이용을 위한 기본 정보" />
+      <TopBar title="회원가입" subtitle="TaxiTa 쉐어를 쓰기 위한 기본 프로필" />
 
       <div className="flex flex-1 flex-col gap-5 px-5 py-6 pb-32">
-        <Field label="학번">
+        <Field label="전화번호" error={fieldErrors.phoneNumber}>
           <input
-            inputMode="numeric"
-            value={studentId}
-            onChange={(e) => setStudentId(e.target.value)}
-            placeholder="예: 20213456"
+            inputMode="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            placeholder="예: 010-1234-5678"
             className="app-input"
           />
         </Field>
 
-        <Field label="이름">
+        <Field label="이름" error={fieldErrors.name}>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="이름을 입력해주세요"
+            placeholder="이름을 입력해 주세요"
             className="app-input"
           />
         </Field>
 
-        <Field label="성별">
+        <Field label="성별" error={fieldErrors.gender}>
           <div className="grid grid-cols-3 gap-2">
             {genders.map((g) => (
               <button
@@ -76,18 +98,17 @@ export default function SignupPage() {
           </div>
         </Field>
 
-        <Field label="학교 이메일">
+        <Field label="대학 이메일" error={fieldErrors.universityEmail}>
           <input
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={universityEmail}
+            onChange={(e) => setUniversityEmail(e.target.value)}
             placeholder="예: minji@jbnu.ac.kr"
             className="app-input"
           />
           <p className="mt-2 flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground">
             <Info className="mt-0.5 size-3.5 shrink-0" />
-            학교 이메일은 소속 정보 확인을 위해 입력받으며, 별도의 인증 절차는
-            없어요.
+            대학 이메일은 가입 확인용 입력값입니다. MVP에서는 별도 인증을 하지 않습니다.
           </p>
         </Field>
 
@@ -106,15 +127,13 @@ export default function SignupPage() {
           >
             {agree ? <Check className="size-4" /> : null}
           </span>
-          <span className="text-sm font-medium">
-            개인정보 수집·이용에 동의합니다.
-          </span>
+          <span className="text-sm font-medium">개인정보 수집 및 이용에 동의합니다.</span>
         </button>
       </div>
 
       <BottomBar>
         <BigButton onClick={handleSubmit} disabled={!canSubmit}>
-          가입하고 시작하기
+          {isSubmitting ? '확인 중...' : '가입하고 시작하기'}
         </BigButton>
       </BottomBar>
     </MobileShell>
@@ -123,15 +142,18 @@ export default function SignupPage() {
 
 function Field({
   label,
+  error,
   children,
 }: {
   label: string
+  error?: string
   children: React.ReactNode
 }) {
   return (
     <div>
       <label className="mb-2 block text-sm font-bold">{label}</label>
       {children}
+      {error ? <p className="mt-2 text-xs font-medium text-warn">{error}</p> : null}
     </div>
   )
 }

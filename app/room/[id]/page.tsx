@@ -22,6 +22,7 @@ import { StatusBadge } from '@/components/status-badge'
 import { Avatar } from '@/components/avatar'
 import { RouteMap } from '@/components/route-map'
 import { useApp } from '@/components/app-provider'
+import { isCountedAsConfirmedParticipant } from '@/lib/domain'
 import { formatPoints, formatWon, getRoomById } from '@/lib/mock-data'
 import { cn } from '@/lib/utils'
 
@@ -46,21 +47,25 @@ export default function RoomDetailPage() {
     )
   }
 
-  const closed = room.status === 'closed'
+  const closed = room.status === 'CLOSED'
   const joined = joinedRoomIds.includes(room.id)
-  const confirmedCount = Math.min(room.members.length + (joined ? 1 : 0), room.maxSeats)
+  const confirmedCount = room.members.filter((m) =>
+    isCountedAsConfirmedParticipant(m.status),
+  ).length
   const filledPct = (room.members.length / room.maxSeats) * 100
 
   function handleDeposit() {
-    depositAndJoin(room)
-    setDepositOpen(false)
-    router.push(`/room/${room.id}/confirm`)
+    if (depositAndJoin(room)) {
+      setDepositOpen(false)
+      router.push(`/room/${room.id}/confirm`)
+    }
   }
 
   function handleClose() {
-    closeRoom(room.id)
-    setCloseOpen(false)
-    toast('모집이 마감되었어요.', 'warn')
+    if (closeRoom(room.id)) {
+      setCloseOpen(false)
+      toast('모집이 마감되었어요.', 'warn')
+    }
   }
 
   return (

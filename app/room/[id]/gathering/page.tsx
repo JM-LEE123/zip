@@ -15,7 +15,7 @@ import { getRoomById } from '@/lib/mock-data'
 export default function GatheringPage() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
-  const { rooms, toast } = useApp()
+  const { rooms, toast, startRide } = useApp()
   const room = rooms.find((r) => r.id === params.id) ?? getRoomById(params.id)
 
   const [seconds, setSeconds] = useState(8 * 60 + 24)
@@ -31,37 +31,46 @@ export default function GatheringPage() {
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0')
   const ss = String(seconds % 60).padStart(2, '0')
 
-  const participants = [
-    ...room.members.map((m) => ({ name: m.displayName, role: m.role, checkedIn: m.role === 'host' })),
-  ]
+  const participants = [...room.members.map((m) => ({ name: m.displayName, role: m.role, checkedIn: m.role === 'host' }))]
+
+  function handleProceed() {
+    const result = startRide(room.id)
+    if (!result.ok) {
+      toast(result.message, 'warn')
+      return
+    }
+
+    toast(result.message, 'success')
+    router.push(`/room/${room.id}/settle`)
+  }
 
   return (
     <MobileShell withTabBar={false}>
-      <TopBar title="출발 준비" subtitle={`${room.origin} → ${room.destination}`} />
+      <TopBar title="GATHERING" subtitle={`${room.origin} → ${room.destination}`} />
 
       <div className="flex flex-1 flex-col gap-4 px-5 py-4">
         <div className="flex flex-col items-center rounded-3xl bg-foreground px-6 py-8 text-background">
           <StatusBadge tone="brand" className="mb-4">
-            출발 준비 중
+            IN_PROGRESS
           </StatusBadge>
-          <p className="text-sm text-background/70">출발까지</p>
+          <p className="text-sm text-background/70">Arrival countdown</p>
           <p className="mt-1 font-mono text-5xl font-extrabold tabular-nums">
             {mm}:{ss}
           </p>
         </div>
 
         <Card className="gap-2">
-          <CardTitle>집결 장소</CardTitle>
+          <CardTitle>Pickup point</CardTitle>
           <div className="flex items-start gap-2">
             <MapPin className="mt-0.5 size-5 text-info" />
             <p className="text-sm font-semibold leading-relaxed">
-              {room.origin} 정문 앞 택시 승강장
+              Meet near {room.origin} and wait for the vehicle.
             </p>
           </div>
         </Card>
 
         <Card className="gap-3">
-          <CardTitle>참여자 체크인</CardTitle>
+          <CardTitle>Participants</CardTitle>
           <div className="flex flex-col gap-2">
             {participants.map((p, i) => {
               const isMe = i === 1
@@ -71,15 +80,15 @@ export default function GatheringPage() {
                   <Avatar name={p.name} index={i} size="sm" />
                   <span className="text-sm font-semibold">
                     {maskName(p.name)}
-                    {isMe ? ' (나)' : ''}
+                    {isMe ? ' (me)' : ''}
                   </span>
                   {checked ? (
                     <StatusBadge tone="mint" className="ml-auto" icon={Check}>
-                      도착
+                      arrived
                     </StatusBadge>
                   ) : (
                     <StatusBadge tone="muted" className="ml-auto" icon={Clock}>
-                      이동 중
+                      waiting
                     </StatusBadge>
                   )}
                 </div>
@@ -89,44 +98,38 @@ export default function GatheringPage() {
 
           <button
             type="button"
-            onClick={() => toast('채팅방은 준비 중이에요. (UI 목업)')}
+            onClick={() => toast('Chat is a placeholder in this sprint.')}
             className="mt-1 flex items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-bold"
           >
             <MessageCircle className="size-4" />
-            채팅방 열기
+            Open chat
           </button>
         </Card>
 
         <Card className="gap-1.5 border-info/30 bg-info-soft">
           <div className="flex items-center gap-1.5 text-sm font-bold text-info">
             <ShieldCheck className="size-4" />
-            안전 안내
+            Safety note
           </div>
           <p className="text-sm leading-relaxed text-foreground/80">
-            낯선 사람과의 이동 전, 집결 장소와 참여자 정보를 확인하세요.
+            Personal details stay hidden until the group reaches the confirmed stage.
           </p>
         </Card>
       </div>
 
       <BottomBar className="flex flex-col gap-2">
-        <BigButton
-          tone={arrived ? 'mint' : 'primary'}
-          onClick={() => {
-            setArrived(true)
-            toast('도착 체크인 완료!', 'success')
-          }}
-        >
+        <BigButton tone={arrived ? 'mint' : 'primary'} onClick={() => setArrived(true)}>
           {arrived ? (
             <>
               <Check className="size-5" />
-              도착 완료
+              Arrived
             </>
           ) : (
-            '내가 도착했어요'
+            'Mark arrived'
           )}
         </BigButton>
-        <BigButton tone="outline" onClick={() => router.push(`/room/${room.id}/settle`)}>
-          도착 후 정산하기
+        <BigButton tone="outline" onClick={handleProceed}>
+          Start settlement
         </BigButton>
       </BottomBar>
     </MobileShell>

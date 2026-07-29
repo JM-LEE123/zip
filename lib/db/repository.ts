@@ -20,6 +20,7 @@ export interface TransactionContext {
   saveMatchRecommendation(row: Omit<MatchRecommendationRow, 'id' | 'calculatedAt'>): Promise<MatchRecommendationRow>
   saveSettlement(row: Omit<SettlementRow, 'id' | 'createdAt' | 'updatedAt'>): Promise<SettlementRow>
   appendPointLedgerEntry(row: Omit<PointLedgerRow, 'id' | 'createdAt'>): Promise<PointLedgerRow>
+  getPointLedgerEntryByIdempotencyKey(idempotencyKey: string): Promise<PointLedgerRow | null>
   createReport(row: Omit<ReportRow, 'id' | 'createdAt' | 'resolvedAt'>): Promise<ReportRow>
   createBlock(row: Omit<BlockRow, 'id' | 'createdAt' | 'liftedAt'>): Promise<BlockRow>
 }

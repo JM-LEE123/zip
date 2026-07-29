@@ -1,33 +1,33 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import {
+  Bell,
+  ChevronRight,
+  FileText,
+  GraduationCap,
+  LogOut,
+  ShieldCheck,
+  Wallet,
+} from 'lucide-react'
 import { useApp } from '@/components/app-provider'
 import { MobileShell } from '@/components/mobile-shell'
 import { TopBar } from '@/components/top-bar'
 import { TabBar } from '@/components/tab-bar'
 import { Card } from '@/components/ui/card'
 import { formatPoints } from '@/lib/mock-data'
-import {
-  ChevronRight,
-  Wallet,
-  ShieldCheck,
-  Bell,
-  FileText,
-  LogOut,
-  GraduationCap,
-} from 'lucide-react'
+import { canManagePoints } from '@/lib/domain'
 
 export default function MyPage() {
   const router = useRouter()
   const { user, toast } = useApp()
 
-  const genderLabel =
-    user.gender === 'female' ? '여성' : user.gender === 'male' ? '남성' : '선택 안 함'
+  const genderLabel = user.gender === 'female' ? '여성' : user.gender === 'male' ? '남성' : '미선택'
 
   const menu = [
-    { icon: Bell, label: '알림 설정', onClick: () => toast('알림 설정은 준비 중이에요') },
-    { icon: ShieldCheck, label: '개인정보 보호', onClick: () => toast('개인정보는 방 안에서 일부만 공개돼요') },
-    { icon: FileText, label: '이용약관 · 정책', onClick: () => toast('약관 페이지는 준비 중이에요') },
+    { icon: Bell, label: '알림 설정', onClick: () => toast('알림 설정은 준비 중입니다.') },
+    { icon: ShieldCheck, label: '개인정보 보호', onClick: () => toast('개인정보 보호 안내를 준비 중입니다.') },
+    { icon: FileText, label: '약관 · 정책', onClick: () => toast('약관 페이지는 준비 중입니다.') },
   ]
 
   return (
@@ -36,17 +36,18 @@ export default function MyPage() {
         title="마이페이지"
         back={false}
         right={
-          <button
-            type="button"
-            onClick={() => router.push('/admin')}
-            className="rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            관리자
-          </button>
+          canManagePoints(user.role) ? (
+            <button
+              type="button"
+              onClick={() => router.push('/admin')}
+              className="rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              관리자
+            </button>
+          ) : null
         }
       />
       <div className="flex-1 overflow-y-auto px-5 pb-28 pt-4">
-        {/* Profile */}
         <Card className="mb-4 flex items-center gap-4 p-5">
           <div className="flex size-14 items-center justify-center rounded-full bg-primary/15 text-lg font-bold text-primary">
             {user.name.charAt(0)}
@@ -55,14 +56,13 @@ export default function MyPage() {
             <p className="text-base font-bold text-foreground">{user.name}</p>
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
               <GraduationCap className="size-3.5" aria-hidden />
-              전북대학교 · {genderLabel}
+              {user.universityEmail} · {genderLabel}
             </p>
             <p className="mt-0.5 text-xs text-muted-foreground">{user.phoneNumber}</p>
             <p className="mt-0.5 truncate text-xs text-muted-foreground">{user.universityEmail}</p>
           </div>
         </Card>
 
-        {/* Points summary */}
         <Card
           className="mb-6 cursor-pointer p-5 transition-colors hover:bg-card/70"
           onClick={() => router.push('/points')}
@@ -81,20 +81,19 @@ export default function MyPage() {
           </div>
           {user.deposited > 0 && (
             <p className="mt-3 rounded-lg bg-warn/10 px-3 py-2 text-xs text-warn-foreground">
-              예치 중 {formatPoints(user.deposited)} · 정산 후 반환돼요
+              예치 중 {formatPoints(user.deposited)} · 정산 후 반환예정
             </p>
           )}
         </Card>
 
-        {/* Menu list */}
         <div className="overflow-hidden rounded-2xl border border-border bg-card">
-          {menu.map((item, i) => (
+          {menu.map((item, index) => (
             <button
               key={item.label}
               type="button"
               onClick={item.onClick}
               className={`flex w-full items-center justify-between px-4 py-4 text-left transition-colors hover:bg-muted ${
-                i !== menu.length - 1 ? 'border-b border-border' : ''
+                index !== menu.length - 1 ? 'border-b border-border' : ''
               }`}
             >
               <span className="flex items-center gap-3 text-sm text-foreground">
@@ -115,7 +114,7 @@ export default function MyPage() {
           로그아웃
         </button>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">택시타쉐어 v0.1 · 전북대 캠퍼스 시범</p>
+        <p className="mt-6 text-center text-xs text-muted-foreground">TaxiTa v0.1 · 대학생 카풀 플랫폼</p>
       </div>
       <TabBar />
     </MobileShell>

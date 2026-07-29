@@ -490,3 +490,156 @@ Validation results:
 
 Follow-up for later sprints:
 - Actual query implementation and transaction handling still need a real Neon driver or repository adapter before persistent writes can run.
+
+## Sprint 4 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Added room creation flow that persists a new in-memory group and routes to its detail page.
+- Added recruitment close method selection alongside approval mode and nearby-destination toggle.
+- Added application flow so participants enter as `APPLIED` or auto-`APPROVED` instead of immediate deposit.
+- Added host approval controls for pending applications on the room detail page.
+- Added recruitment close handling that transitions to `CLOSED` when the group has enough confirmed participants, otherwise `EXPIRED`.
+- Reworked the confirmation page to show application / approval / closed / expired outcomes instead of deposit completion.
+- Updated room cards and status labels to show explicit group lifecycle states.
+- Added domain helpers and focused checks for application, approval, and recruitment closure status resolution.
+
+Current repo findings:
+- Group lifecycle is now interactive in the mock UI rather than a static mock room list.
+- The host can create a group, a participant can apply, and the host can approve or close recruitment from the room detail screen.
+- The flow still uses in-memory state, so Sprint 5+ persistent repository integration is still required for durable data.
+
+Validation results:
+- `npm run test:domain`: passed
+- `npm run build`: passed
+- `npm run lint`: blocked because `eslint` is not installed in the repository
+
+## Sprint 11 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Added `scripts/release-check.mjs` to verify release-critical environment names, Vercel project linkage, package scripts, and Neon environment routing rules without printing secrets.
+- Added `npm run test:release` for repeatable release-readiness validation.
+- Verified the existing regression scripts for domain, matching, profile, and schema contracts.
+- Confirmed the repository is linked to a Vercel project through `.vercel/project.json`.
+- Confirmed the build still succeeds after the release-readiness checks and sprint 9 changes.
+
+Validation results:
+- `npm run test:release`: passed
+- `npm run test:domain`: passed
+- `npm run test:matching`: passed
+- `npm run test:profile`: passed
+- `npm run test:schema`: passed
+- `npm run build`: passed
+- `npm run lint`: blocked because `eslint` is not installed in the repository
+
+Open blocker:
+- Production deploy was not run in this sprint. Vercel Preview/Production environment values still need to be verified on the Vercel side before a production release.
+
+## Sprint 9 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Added ride-start state so confirmed groups can transition into `IN_PROGRESS`.
+- Added settlement request flow that moves a room into `SETTLEMENT_PENDING` with a pending settlement snapshot.
+- Added final settlement completion flow that moves a room into `COMPLETED`, clears reserved deposits, and records the final ledger entry.
+- Kept no-show settlement math on the confirmed participant count, matching the current PRD rule.
+- Reworked the settlement screens so the request and completion steps are explicit and stateful.
+
+Validation results:
+- `npm run test:domain`: passed
+- `npm run build`: passed
+- `npm run lint`: blocked because `eslint` is not installed in the repository
+
+## Sprint 8 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Added a deposit eligibility helper in `lib/domain.ts` so approval and deposit checks use the same rule set.
+- Added `depositForRoom` to the app provider with idempotency, ledger writes, available-balance validation, and participant state updates.
+- Converted the room confirmation screen into a deposit preview and action flow.
+- Promoted a room to `CONFIRMED` once the minimum participant threshold is met after deposit.
+- Kept the points page consistent by treating `points` as total balance and `deposited` as reserved balance.
+
+Validation results:
+- `npm run test:domain`: passed
+- `npm run build`: passed
+- `npm run lint`: blocked because `eslint` is not installed in the repository
+
+Follow-up for later sprints:
+- Recruitment close and confirmation are now represented in the UI, but the backend repository and persistent state transitions still need to be wired in before real data can drive them.
+
+## Sprint 5 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Added a typed route/fare provider contract in `lib/matching/types.ts`.
+- Added a deterministic mock distance provider with normalized route output, provider basis, calculated time, and fallback path.
+- Added a shared route summary service so room seeds and room creation use the same route/fare calculation path.
+- Wired route/fare estimation into room creation so new rooms persist estimated fare, distance, duration, and route metadata in in-memory state.
+- Added route/fare metadata to the room detail and room card views.
+- Added a focused matching verification script at `scripts/matching-check.mjs`.
+
+Current repo findings:
+- The app now carries route estimate metadata on each room rather than relying only on hard-coded demo numbers.
+- The mock provider is deterministic and returns a normalized route record suitable for later persistence to `fare_estimates` and `match_recommendations`.
+- Real map-provider integration is still not wired, so this remains a mock provider path with a deterministic fallback.
+
+Validation results:
+- `npm run test:matching`: passed
+- `npm run test:domain`: passed
+- `npm run build`: passed
+- `npm run lint`: blocked because `eslint` is not installed in the repository
+
+Follow-up for later sprints:
+- Sprint 6 can now build on the route summary and detour metadata when adding eligible-group matching and explanation ranking.
+
+## Sprint 6 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Added a typed matching engine in `lib/matching/matcher.ts` that ranks only eligible open groups.
+- Added configurable matching thresholds for detour, route distance delta, route duration delta, and minimum score.
+- Added deterministic fallback explanation behavior when no eligible group exists.
+- Extended route summaries to carry detour minutes so matching can evaluate nearby-destination policy directly.
+- Wired the home screen to a live matching input panel and sorted recommendation list.
+- Updated room cards to surface recommendation score and human-readable reason.
+- Added focused matching coverage for recommendation ranking and fallback behavior.
+
+Current repo findings:
+- Matching now uses stored route estimates plus requester inputs to score open groups.
+- Nearby destination support is explicit and threshold-driven instead of hard-coded in UI-only logic.
+- Recommendation output now carries matched trip group ID, normalized route, calculation time, score, and explanation.
+
+Validation results:
+- `npm run test:matching`: passed
+- `npm run test:domain`: passed
+- `npm run build`: passed
+- `npm run lint`: blocked because `eslint` is not installed in the repository
+
+Follow-up for later sprints:
+- Sprint 7 can layer transaction-safe point issuance on top of the explicit match and participant lifecycle now in place.
+
+## Sprint 7 Execution Note
+
+Date: 2026-07-29
+
+Completed:
+- Added admin-only point grant gating with `canManagePoints`.
+- Added append-only point ledger seed data and surfaced the ledger in app state.
+- Implemented idempotent `grantPoints` flow in the client provider with replay detection.
+- Wired the admin page to record grants through the shared provider state.
+- Hid the admin entry point on My Page unless the current user is an admin.
+- Added repository contract support for point-ledger idempotency lookup.
+- Added a focused domain check for the new admin authorization helper.
+
+Validation results:
+- `npm run test:domain`: passed
+- `npm run build`: passed
+- `npm run lint`: blocked because `eslint` is not installed in the repository

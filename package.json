@@ -8,8 +8,10 @@
     "start": "next start",
     "lint": "eslint .",
     "test:domain": "node scripts/domain-check.mjs",
+    "test:matching": "node scripts/matching-check.mjs",
     "test:profile": "node scripts/profile-check.mjs",
     "test:schema": "node scripts/schema-check.mjs",
+    "test:release": "node scripts/release-check.mjs",
     "vercel:env": "powershell -ExecutionPolicy Bypass -File scripts/vercel-env.ps1",
     "vercel:run": "powershell -ExecutionPolicy Bypass -File scripts/vercel-run.ps1"
   },

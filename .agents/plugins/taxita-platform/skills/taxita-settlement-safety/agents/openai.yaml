@@ -1,0 +1,5 @@
+interface:
+  display_name: "TaxiTa Settlement Safety"
+  short_description: "Protect point and settlement correctness."
+  default_prompt: "Use $taxita-settlement-safety to review this TaxiTa point flow."
+

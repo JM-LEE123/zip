@@ -1,0 +1,5 @@
+interface:
+  display_name: "TaxiTa Matching Engine"
+  short_description: "Build explainable route-based matching."
+  default_prompt: "Use $taxita-matching-engine to implement this TaxiTa recommendation feature."
+

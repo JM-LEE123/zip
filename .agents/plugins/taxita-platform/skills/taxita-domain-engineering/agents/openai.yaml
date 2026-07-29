@@ -1,0 +1,5 @@
+interface:
+  display_name: "TaxiTa Domain Engineering"
+  short_description: "Implement TaxiTa matching and settlement safely."
+  default_prompt: "Use $taxita-domain-engineering to implement this TaxiTa MVP feature safely."
+

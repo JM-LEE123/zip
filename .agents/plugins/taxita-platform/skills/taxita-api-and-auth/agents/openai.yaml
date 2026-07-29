@@ -1,0 +1,5 @@
+interface:
+  display_name: "TaxiTa API and Authorization"
+  short_description: "Build secure TaxiTa server boundaries."
+  default_prompt: "Use $taxita-api-and-auth to implement this TaxiTa server operation."
+

@@ -1,0 +1,5 @@
+interface:
+  display_name: "TaxiTa Mobile UI"
+  short_description: "Build accessible mobile TaxiTa flows."
+  default_prompt: "Use $taxita-mobile-ui to implement this TaxiTa mobile screen."
+

@@ -1,0 +1,5 @@
+interface:
+  display_name: "TaxiTa Release Readiness"
+  short_description: "Prepare safe Vercel previews for TaxiTa."
+  default_prompt: "Use $taxita-release-readiness to check TaxiTa before a Vercel preview."
+

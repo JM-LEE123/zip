@@ -1,0 +1,5 @@
+interface:
+  display_name: "TaxiTa Quality Gates"
+  short_description: "Verify TaxiTa MVP changes before release."
+  default_prompt: "Use $taxita-quality-gates to verify this TaxiTa change."
+

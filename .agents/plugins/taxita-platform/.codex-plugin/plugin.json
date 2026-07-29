@@ -1,0 +1,23 @@
+{
+  "name": "taxita-platform",
+  "version": "1.1.0",
+  "description": "TaxiTa MVP workflows for API, Neon, matching, settlement, mobile UI, quality, and Vercel releases.",
+  "author": {
+    "name": "TaxiTa Team"
+  },
+  "keywords": ["nextjs", "vercel", "neon", "matching", "settlement", "taxita"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "TaxiTa Platform",
+    "shortDescription": "Build and release TaxiTa safely.",
+    "longDescription": "PRD-driven workflows for TaxiTa API, Neon data, matching, settlement, mobile UI, quality, and Vercel releases.",
+    "developerName": "TaxiTa Team",
+    "category": "Productivity",
+    "capabilities": ["Write"],
+    "defaultPrompt": [
+      "Use $taxita-domain-engineering to plan this TaxiTa feature.",
+      "Use $taxita-settlement-safety to review a TaxiTa point flow.",
+      "Use $taxita-release-readiness to prepare a safe Vercel preview."
+    ]
+  }
+}

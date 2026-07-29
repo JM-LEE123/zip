@@ -1,0 +1,5 @@
+interface:
+  display_name: "TaxiTa Neon Data"
+  short_description: "Model Neon data and transactions safely."
+  default_prompt: "Use $taxita-neon-data to design this TaxiTa database change."
+
